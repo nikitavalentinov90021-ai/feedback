@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quor Feedback</title>
+  <style>
+    /* ---------- RESET & БАЗА ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0b0e1a;
+      color: #eaeef2;
+      min-height: 100vh;
+      padding-top: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* ---------- ШАПКА ---------- */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px 40px;
+      background: rgba(11, 14, 26, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 999;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #a78bfa, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #a78bfa;
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border: none;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #8b5cf6, #818cf8);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+    .btn-dollar {
+      font-size: 22px;
+      line-height: 1;
+      padding: 4px 16px;
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+    .btn-dollar:hover {
+      background: rgba(251, 191, 36, 0.15);
+      border-color: #f59e0b;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    }
+    .user-name {
+      color: #c4b5fd;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    /* ---------- КОНТЕЙНЕР ОТЗЫВОВ ---------- */
+    .container {
+      max-width: 720px;
+      width: 100%;
+      padding: 0 20px;
+    }
+    .reviews-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .reviews-title span {
+      background: linear-gradient(135deg, #a78bfa, #6366f1);
+      padding: 2px 12px;
+      border-radius: 40px;
+      font-size: 14px;
+      color: #fff;
+    }
+    .review-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+    .review-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(167, 139, 250, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .review-name {
+      font-weight: 700;
+      color: #e0e7ff;
+    }
+    .review-project {
+      background: rgba(99, 102, 241, 0.2);
+      padding: 2px 12px;
+      border-radius: 40px;
+      font-size: 12px;
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .review-stars {
+      color: #fbbf24;
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin: 6px 0 8px;
+    }
+    .review-text {
+      color: #cbd5e1;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+    .review-date {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 10px;
+    }
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 40px 0;
+      font-size: 18px;
+    }
+
+    /* ---------- МОДАЛКИ ---------- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: #141b2b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 36px 40px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      animation: slideUp 0.3s ease;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 28px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .modal-close:hover {
+      color: #fff;
+      transform: rotate(90deg);
+    }
+    .modal h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #c4b5fd, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .modal label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #b9c7e0;
+      font-size: 14px;
+    }
+    .modal input,
+    .modal select,
+    .modal textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #f1f5f9;
+      font-size: 15px;
+      transition: 0.2s;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    .modal input:focus,
+    .modal select:focus,
+    .modal textarea:focus {
+      outline: none;
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    }
+    .modal textarea {
+      resize: vertical;
+      min-height: 100px;
+      max-height: 200px;
+    }
+    .modal .btn-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .modal .btn-submit:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+    .modal .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error-msg {
+      color: #f87171;
+      font-size: 14px;
+      margin-top: -10px;
+      margin-bottom: 16px;
+    }
+
+    /* ---------- 3D ЗВЁЗДЫ ---------- */
+    .stars-container {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      justify-content: center;
+      perspective: 600px;
+    }
+    .star {
+      font-size: 36px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      transform-style: preserve-3d;
+      display: inline-block;
+      user-select: none;
+    }
+    .star.active {
+      color: #fbbf24;
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+    }
+    .star:hover {
+      transform: scale(1.3) rotateY(25deg) rotateX(10deg);
+      color: #fcd34d;
+      text-shadow: 0 0 30px #fbbf24;
+    }
+    .star.active:hover {
+      transform: scale(1.4) rotateY(-20deg) rotateX(5deg);
+    }
+
+    /* ---------- ДОНАТ ---------- */
+    .donate-block {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .donate-block h3 {
+      color: #fbbf24;
+      margin-bottom: 10px;
+    }
+    .donate-block p {
+      color: #b9c7e0;
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .donate-block .copy-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    .donate-block .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .donate-link {
+      display: inline-block;
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 40px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      transition: 0.3s;
+    }
+    .donate-link:hover {
+      background: rgba(59, 130, 246, 0.25);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+    }
+
+    /* ---------- АНИМАЦИИ ---------- */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* ---------- АДАПТИВ ---------- */
+    @media (max-width: 600px) {
+      header {
+        padding: 12px 16px;
+      }
+      .logo {
+        font-size: 22px;
+      }
+      .btn {
+        padding: 6px 14px;
+        font-size: 12px;
+      }
+      .modal {
+        padding: 24px 20px;
+      }
+      .star {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header>
+    <div class="logo">✦ Quor</div>
+    <div class="header-actions">
+      <span class="user-name" id="userNameDisplay"></span>
+      <button class="btn btn-primary" id="addReviewBtn">+ Отзыв</button>
+      <button class="btn btn-dollar" id="donateBtn">$</button>
+    </div>
+  </header>
+
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+  <div class="container">
+    <div class="reviews-title">
+      Отзывы <span id="reviewCount">0</span>
+    </div>
+    <div id="reviewsList">
+      <div class="empty">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА ВВОДА ИМЕНИ -->
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal">
+      <button class="modal-close" id="nameModalClose">&times;</button>
+      <h2>👋 Добро пожаловать!</h2>
+      <p style="color:#94a3b8; margin-bottom:20px;">Представьтесь, чтобы оставлять отзывы</p>
+      <input type="text" id="nameInput" placeholder="Ваше имя" maxlength="30" />
+      <button class="btn-submit" id="nameSubmit">Продолжить</button>
+      <div id="nameError" class="error-msg" style="display:none;">Введите имя</div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА ДОБАВЛЕНИЯ ОТЗЫВА -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal">
+      <button class="modal-close" id="reviewModalClose">&times;</button>
+      <h2>✍️ Новый отзыв</h2>
+      <form id="reviewForm">
+        <label>Проект</label>
+        <select id="projectSelect" required>
+          <option value="">Выберите...</option>
+          <option value="VPN">VPN</option>
+          <option value="Lynx">Lynx</option>
+          <option value="Quorvox">Quorvox</option>
+          <option value="QuorKick">QuorKick</option>
+          <option value="QuorStream">QuorStream</option>
+        </select>
+
+        <label>Оценка</label>
+        <div class="stars-container" id="starsContainer">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+        <input type="hidden" id="ratingInput" value="5" />
+
+        <label>Текст отзыва</label>
+        <textarea id="textInput" placeholder="Расскажите о впечатлении..." maxlength="1000" required></textarea>
+        <div style="text-align:right; font-size:12px; color:#64748b; margin-top:-10px; margin-bottom:16px;">
+          <span id="charCount">0</span> / 1000
+        </div>
+
+        <div id="reviewError" class="error-msg" style="display:none;"></div>
+        <button type="submit" class="btn-submit" id="reviewSubmit">Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА ДОНАТА -->
+  <div class="modal-overlay" id="donateModal">
+    <div class="modal">
+      <button class="modal-close" id="donateModalClose">&times;</button>
+      <h2>💎 Поддержать Quor</h2>
+      <div class="donate-block">
+        <h3>💳 По ссылке (SBP)</h3>
+        <a href="https://finance.ozon.ru/apps/sbp/ozonbankpay/019aab53-c4c0-7707-aafb-0da13b8598fb" target="_blank" class="donate-link">
+          Перейти к оплате →
+        </a>
+      </div>
+      <div class="donate-block">
+        <h3>₿ USDT (TON)</h3>
+        <p>
+          <span>UQAimCgwnnYuv8tTwbrH5xhGuIKnqJJ-KN7Ff0QKYjFKDGOr</span>
+          <button class="copy-btn" id="copyCrypto">Копировать</button>
+        </p>
+      </div>
+      <p style="font-size:13px; color:#64748b; margin-top:12px;">Спасибо за вашу поддержку ❤️</p>
+    </div>
+  </div>
+
+  <script>
+    // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
+    let currentUser = localStorage.getItem('quor_user') || '';
+    let selectedRating = 5;
+
+    // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      // Если имя не сохранено – показываем модалку
+      if (!currentUser) {
+        document.getElementById('nameModal').classList.add('active');
+      } else {
+        document.getElementById('userNameDisplay').textContent = currentUser;
+        loadReviews();
+      }
+
+      // Закрытие модалок по клику на оверлей
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) overlay.classList.remove('active');
+        });
+      });
+    });
+
+    // ---------- РАБОТА С ИМЕНЕМ ----------
+    const nameInput = document.getElementById('nameInput');
+    const nameSubmit = document.getElementById('nameSubmit');
+    const nameError = document.getElementById('nameError');
+    const nameModalClose = document.getElementById('nameModalClose');
+
+    nameSubmit.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (name.length < 2) {
+        nameError.style.display = 'block';
+        return;
+      }
+      nameError.style.display = 'none';
+      currentUser = name;
+      localStorage.setItem('quor_user', name);
+      document.getElementById('userNameDisplay').textContent = name;
+      document.getElementById('nameModal').classList.remove('active');
+      loadReviews();
+    });
+
+    nameModalClose.addEventListener('click', () => {
+      // Не даем закрыть без имени
+    });
+
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') nameSubmit.click();
+    });
+
+    // ---------- ЗВЁЗДЫ (3D анимация + выбор) ----------
+    const stars = document.querySelectorAll('#starsContainer .star');
+    const ratingInput = document.getElementById('ratingInput');
+
+    function setStars(value) {
+      selectedRating = value;
+      ratingInput.value = value;
+      stars.forEach(star => {
+        const val = parseInt(star.dataset.value);
+        star.classList.toggle('active', val <= value);
+      });
+    }
+
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.dataset.value);
+        setStars(val);
+      });
+      star.addEventListener('mouseenter', () => {
+        const val = parseInt(star.dataset.value);
+        stars.forEach(s => {
+          const sv = parseInt(s.dataset.value);
+          s.style.color = sv <= val ? '#fcd34d' : '#475569';
+        });
+      });
+      star.addEventListener('mouseleave', () => {
+        setStars(selectedRating);
+      });
+    });
+    // По умолчанию 5 звёзд
+    setStars(5);
+
+    // ---------- СЧЁТЧИК СИМВОЛОВ ----------
+    const textInput = document.getElementById('textInput');
+    const charCount = document.getElementById('charCount');
+    textInput.addEventListener('input', () => {
+      charCount.textContent = textInput.value.length;
+    });
+
+    // ---------- ЗАГРУЗКА ОТЗЫВОВ ----------
+    async function loadReviews() {
+      try {
+        const res = await fetch('/api/reviews');
+        const reviews = await res.json();
+        const list = document.getElementById('reviewsList');
+        const count = document.getElementById('reviewCount');
+
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          list.innerHTML = `<div class="empty">Пока нет отзывов. Будьте первым!</div>`;
+          count.textContent = '0';
+          return;
+        }
+
+        count.textContent = reviews.length;
+        list.innerHTML = reviews.map(r => `
+          <div class="review-card">
+            <div class="review-header">
+              <span class="review-name">${escapeHtml(r.name)}</span>
+              <span class="review-project">${escapeHtml(r.project)}</span>
+            </div>
+            <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            <div class="review-text">${escapeHtml(r.text)}</div>
+            <div class="review-date">${new Date(r.date).toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' })}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('reviewsList').innerHTML = `<div class="empty">Ошибка загрузки</div>`;
+      }
+    }
+
+    // простой эскейп для безопасности
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ---------- ДОБАВЛЕНИЕ ОТЗЫВА ----------
+    const reviewModal = document.getElementById('reviewModal');
+    const addReviewBtn = document.getElementById('addReviewBtn');
+    const reviewModalClose = document.getElementById('reviewModalClose');
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewError = document.getElementById('reviewError');
+
+    addReviewBtn.addEventListener('click', () => {
+      if (!currentUser) {
+        document.getElementById('nameModal').classList.add('active');
+        return;
+      }
+      reviewForm.reset();
+      setStars(5);
+      textInput.value = '';
+      charCount.textContent = '0';
+      reviewError.style.display = 'none';
+      reviewModal.classList.add('active');
+    });
+
+    reviewModalClose.addEventListener('click', () => reviewModal.classList.remove('active'));
+
+    reviewForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const project = document.getElementById('projectSelect').value;
+      const rating = parseInt(ratingInput.value);
+      const text = textInput.value.trim();
+
+      if (!project) {
+        reviewError.textContent = 'Выберите проект';
+        reviewError.style.display = 'block';
+        return;
+      }
+      if (text.length === 0 || text.length > 1000) {
+        reviewError.textContent = 'Текст должен быть от 1 до 1000 символов';
+        reviewError.style.display = 'block';
+        return;
+      }
+      reviewError.style.display = 'none';
+
+      const submitBtn = document.getElementById('reviewSubmit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Отправка...';
+
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: currentUser, rating, text, project })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Ошибка при отправке');
+        }
+        reviewModal.classList.remove('active');
+        loadReviews();
+      } catch (err) {
+        reviewError.textContent = err.message;
+        reviewError.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Отправить';
+      }
+    });
+
+    // ---------- ДОНАТ ----------
+    const donateBtn = document.getElementById('donateBtn');
+    const donateModal = document.getElementById('donateModal');
+    const donateModalClose = document.getElementById('donateModalClose');
+
+    donateBtn.addEventListener('click', () => donateModal.classList.add('active'));
+    donateModalClose.addEventListener('click', () => donateModal.classList.remove('active'));
+
+    document.getElementById('copyCrypto').addEventListener('click', () => {
+      const addr = 'UQAimCgwnnYuv8tTwbrH5xhGuIKnqJJ-KN7Ff0QKYjFKDGOr';
+      navigator.clipboard.writeText(addr).then(() => {
+        const btn = document.getElementById('copyCrypto');
+        btn.textContent = '✅ Скопировано';
+        setTimeout(() => btn.textContent = 'Копировать', 2000);
+      }).catch(() => {
+        alert('Скопируйте вручную: ' + addr);
+      });
+    });
+
+    // ---------- ЗАКРЫТИЕ МОДАЛОК ПО ESC ----------
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+      }
+    });
+
+    // ---------- ПЕРЕЗАГРУЗКА ОТЗЫВОВ ПРИ ВОЗВРАТЕ ----------
+    // При первом открытии уже загружены
+  </script>
+</body>
+</html>
